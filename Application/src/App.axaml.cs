@@ -1,4 +1,4 @@
-namespace CrystalCircuits.Application;
+namespace  CrystalCircuits.Application;
 
 public partial class App : Avalonia.Application
 {

@@ -1,5 +1,10 @@
-﻿AppBuilder.Configure<App>()
+﻿
+using Microsoft.Extensions.DependencyInjection;
+
+Service.Register(new ServiceCollection());
+AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()
-            .LogToTrace();
+            .LogToTrace()
+            .StartWithClassicDesktopLifetime(args);
 
