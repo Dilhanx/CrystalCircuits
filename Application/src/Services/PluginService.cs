@@ -23,16 +23,23 @@ class PluginService
             Plugins.Add(type);
         }
         AssemblyLoadContext assemblyLoadContext = new("Plugins");
-        string[] files = Directory.GetFiles(path, "*.dll");
-
-        foreach (string file in files)
+        try
         {
-            Assembly assembly = assemblyLoadContext.LoadFromAssemblyPath(Directory.GetCurrentDirectory() + "\\" + file);
-            foreach (var type in assembly.GetTypes().Where(t => typeof(IModule).IsAssignableFrom(t)))
+            string[] files = Directory.GetFiles(path, "*.dll");
+            foreach (string file in files)
             {
-                Plugins.Add(type);
+                Assembly assembly = assemblyLoadContext.LoadFromAssemblyPath(Directory.GetCurrentDirectory() + "\\" + file);
+                foreach (var type in assembly.GetTypes().Where(t => typeof(IModule).IsAssignableFrom(t)))
+                {
+                    Plugins.Add(type);
+                }
             }
         }
+        catch (System.Exception)
+        {
+
+        }
+
     }
     public IModule CreateModule(Type Plugin)
     {

@@ -1,7 +1,4 @@
-﻿
-using Microsoft.Extensions.DependencyInjection;
-
-Service.Register(new ServiceCollection());
+﻿Service.Register();
 AppBuilder.Configure<App>()
             .UsePlatformDetect()
             .WithInterFont()

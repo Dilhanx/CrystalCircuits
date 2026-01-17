@@ -6,9 +6,12 @@ static class Service
 {
     public static IServiceProvider Instance { get; set; } = null!;
 
-    public static void Register(IServiceCollection collection)
+    public static void Register()
     {
+
+        ServiceCollection collection = new();
         collection.AddSingleton<PluginService>();
+        collection.AddSingleton<InputService>();
         Instance = collection.BuildServiceProvider();
     }
 }

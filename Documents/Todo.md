@@ -8,7 +8,7 @@
   - steps:
       - [ ] Canvas
       - [ ] Zoom
-      - [ ] Pan
+      - [x] Pan
       - [ ] Draw Plugin
       - [ ] List Plugins
       - [ ] Context Menu
