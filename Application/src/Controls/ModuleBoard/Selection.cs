@@ -199,7 +199,7 @@ class Selection(CameraController cameraController, BoardState boardState, DeltaT
     public void DrawBoxSelect(DrawingContext context)
     {
         if (boxSelecting)
-            context.DrawRectangle(new SolidColorBrush(new Color(100, 255, 255, 255)),
+            context.DrawRectangle(new SolidColorBrush(new Color(25, 255, 255, 255)),
                                 new Pen(new SolidColorBrush(new Color(255, 255, 255, 255)), 1),
                                 boxSelect.Normalize(), 0);
     }

@@ -7,6 +7,7 @@ class CameraController
 {
     public Point Position { get; private set; } = new(0, 0);
     public Size ViewportSize { get; set; } = new(0, 0);
+    public Rect Rect => new(new(-Position.X / Zoom.X, -Position.Y / Zoom.Y), new Size(ViewportSize.Width / Zoom.X, ViewportSize.Height / Zoom.Y));
 
     Point panMouseStart;
     Point panCanvasStart;

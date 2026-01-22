@@ -1,7 +1,4 @@
-
-
 namespace CrystalCircuits.Core.Modules;
-
 
 public interface IModule
 {

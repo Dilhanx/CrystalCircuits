@@ -1,3 +1,4 @@
+using Avalonia.Controls;
 using Avalonia.Input;
 using ReactiveUI;
 
@@ -5,7 +6,7 @@ namespace CrystalCircuits.Application.Controls.ModuleBoards;
 
 static class Hotkeys
 {
-    public static void Add(List<Avalonia.Input.KeyBinding> keyBindings, BoardState boardState, Selection selection)
+    public static void Add(ModuleBoard moduleBoard, List<Avalonia.Input.KeyBinding> keyBindings, BoardState boardState, Selection selection)
     {
         keyBindings.Add(new KeyBinding
         {
@@ -55,6 +56,51 @@ static class Hotkeys
                     {
                         Service.Instance.GetService<CommandService>()!.Do(new DeleteModuleCommand(boardState, selection.Selected));
                         selection.DeselectAll();
+                    }
+                })
+        });
+
+        keyBindings.Add(new KeyBinding
+        {
+            Gesture = new KeyGesture(Key.N, KeyModifiers.Control),
+            Command = ReactiveCommand.Create(() =>
+                {
+                    if (!selection.Locked)
+                    {
+                        Service.Instance.GetService<ProjectService>()!.New();
+                    }
+                })
+        });
+        keyBindings.Add(new KeyBinding
+        {
+            Gesture = new KeyGesture(Key.O, KeyModifiers.Control),
+            Command = ReactiveCommand.Create(async () =>
+                {
+                    if (!selection.Locked)
+                    {
+                        await Service.Instance.GetService<ProjectService>()!.LoadAsync(TopLevel.GetTopLevel(moduleBoard)!);
+                    }
+                })
+        });
+        keyBindings.Add(new KeyBinding
+        {
+            Gesture = new KeyGesture(Key.S, KeyModifiers.Control),
+            Command = ReactiveCommand.Create(async () =>
+                {
+                    if (!selection.Locked)
+                    {
+                        await Service.Instance.GetService<ProjectService>()!.SaveAsync(TopLevel.GetTopLevel(moduleBoard)!);
+                    }
+                })
+        });
+        keyBindings.Add(new KeyBinding
+        {
+            Gesture = new KeyGesture(Key.S, KeyModifiers.Control | KeyModifiers.Shift),
+            Command = ReactiveCommand.Create(async () =>
+                {
+                    if (!selection.Locked)
+                    {
+                        await Service.Instance.GetService<ProjectService>()!.SaveAsAsync(TopLevel.GetTopLevel(moduleBoard)!);
                     }
                 })
         });

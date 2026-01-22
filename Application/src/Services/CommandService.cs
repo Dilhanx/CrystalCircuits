@@ -34,4 +34,10 @@ class CommandService
             doCommands.Push(command);
         }
     }
+    public void Clear()
+    {
+        doCommands.Clear();
+        undoCommands.Clear();
+    }
+
 }

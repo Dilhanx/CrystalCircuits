@@ -14,7 +14,7 @@ public class ModuleBoard : UserControl
     private readonly CameraController cameraController = new();
     private readonly DeltaTime deltaTime = new();
     private readonly DebugInfo debugInfo = new();
-    private readonly BoardState boardState = new();
+    private readonly BoardState boardState;
     private readonly Selection selection;
 
 
@@ -22,9 +22,11 @@ public class ModuleBoard : UserControl
     {
         Loaded += StartUpdateLoop!;
         SizeChanged += SizeChange;
+        boardState = Service.Instance.GetService<ProjectService>()!.boardState;
         Focusable = true;
         selection = new(cameraController, boardState, deltaTime);
-        Hotkeys.Add(KeyBindings, boardState, selection);
+        Hotkeys.Add(this, KeyBindings, boardState, selection);
+
     }
 
     private void SizeChange(object? sender, SizeChangedEventArgs e)
@@ -110,16 +112,17 @@ public class ModuleBoard : UserControl
     public sealed override void Render(DrawingContext context)
     {
         base.Render(context);
-        context.DrawRectangle(new SolidColorBrush(new Color(255, 245, 245, 245)), new Pen(0), new Rect(Bounds.Size), 0);
+        // context.DrawRectangle(new SolidColorBrush(new Color(50, 245, 245, 245)), new Pen(0), new Rect(Bounds.Size), 0);
+        context.DrawRectangle(Brushes.Transparent, new Pen(0), new Rect(Bounds.Size), 0);
 
         context.PushTransform(Matrix.CreateTranslation(cameraController.Position));
         context.PushTransform(Matrix.CreateScale(cameraController.Zoom));
 
-
         foreach (var module in boardState.Modules)
         {
             context.PushTransform(Matrix.CreateTranslation(module.View.Position));
-            module.Draw(context);
+            if (module.View.Rect.Intersects(cameraController.Rect))
+                module.Draw(context);
             context.PushTransform(Matrix.CreateTranslation(-module.View.Position));
         }
         selection.DrawBoxSelect(context);
@@ -132,15 +135,15 @@ public class ModuleBoard : UserControl
 
 
         debugInfo.Reset();
-        debugInfo.Draw(context, deltaTime.Time.ToString());
-        debugInfo.Draw(context, deltaTime.Fps.ToString());
-        debugInfo.Draw(context, cameraController.Position.ToString());
-        debugInfo.Draw(context, cameraController.Zoom.ToString());
-        debugInfo.Draw(context, selection.MouseViewportPosition.ToString());
-        debugInfo.Draw(context, selection.MouseCanvasPosition.ToString());
-        debugInfo.Draw(context, selection.boxSelect.TopLeft.ToString());
-        debugInfo.Draw(context, selection.boxSelect.BottomRight.ToString());
-
+        debugInfo.Draw(context, $"{deltaTime.Time.ToString()} Time");
+        debugInfo.Draw(context, $"{deltaTime.Fps.ToString()} Fps");
+        debugInfo.Draw(context, $"Position {cameraController.Position.ToString()} ");
+        debugInfo.Draw(context, $"Size {cameraController.ViewportSize.ToString()} ");
+        debugInfo.Draw(context, $"Zoom {cameraController.Zoom.ToString()} ");
+        debugInfo.Draw(context, $"MouseViewportPosition{selection.MouseViewportPosition.ToString()} ");
+        debugInfo.Draw(context, $"MouseCanvasPosition {selection.MouseCanvasPosition.ToString()} ");
+        debugInfo.Draw(context, $"{selection.boxSelect.TopLeft.ToString()} ");
+        debugInfo.Draw(context, $"{selection.boxSelect.BottomRight.ToString()} ");
 
         debugInfo.Dump(context, boardState, selection);
 

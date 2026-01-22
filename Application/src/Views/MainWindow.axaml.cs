@@ -12,10 +12,13 @@ namespace CrystalCircuits.Application;
 
 public partial class MainWindow : Window
 {
-
-
     public MainWindow()
     {
         InitializeComponent();
+        Background = Brushes.Transparent;
+        ExtendClientAreaToDecorationsHint = true;
+        // SystemDecorations = SystemDecorations.BorderOnly;
+        // ExtendClientAreaChromeHints = Avalonia.Platform.ExtendClientAreaChromeHints.NoChrome;
     }
+
 }

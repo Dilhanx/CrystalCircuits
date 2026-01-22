@@ -41,6 +41,16 @@ public class Test : IModule
             Brushes.Black),
             new Point(View.Size.Width / 2, View.Size.Height / 2)
         );
+        context.DrawText(
+            new FormattedText(
+            View.Position.ToString(),
+            CultureInfo.InvariantCulture, // Initial culture
+            FlowDirection.LeftToRight,
+            new Typeface("helvetica", FontStyle.Normal, FontWeight.ExtraLight),
+            12,
+            Brushes.Black),
+            new Point(0, 0)
+        );
     }
 
     public void Update()
