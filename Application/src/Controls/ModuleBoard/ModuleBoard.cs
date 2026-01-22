@@ -5,124 +5,144 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using CrystalCircuits.Application.Controls.ModuleBoards;
+using ReactiveUI;
 
 namespace CrystalCircuits.Application.Controls;
 
 public class ModuleBoard : UserControl
 {
-    private readonly CameraController CameraController = new();
-    private readonly DeltaTime DeltaTime = new();
-    private readonly DebugInfo DebugInfo = new();
+    private readonly CameraController cameraController = new();
+    private readonly DeltaTime deltaTime = new();
+    private readonly DebugInfo debugInfo = new();
+    private readonly BoardState boardState = new();
+    private readonly Selection selection;
+
 
     public ModuleBoard()
     {
         Loaded += StartUpdateLoop!;
+        SizeChanged += SizeChange;
+        Focusable = true;
+        selection = new(cameraController, boardState, deltaTime);
+        Hotkeys.Add(KeyBindings, boardState, selection);
     }
+
+    private void SizeChange(object? sender, SizeChangedEventArgs e)
+    {
+        cameraController.ViewportSize = Bounds.Size;
+    }
+
     protected override void OnPointerMoved(PointerEventArgs e)
     {
-        Service.Instance.GetService<InputService>()!.MousePosition = e.GetPosition(this);
-        CameraController.Panning(e.GetPosition(this));
+        selection.MouseViewportPosition = e.GetPosition(this);
+        cameraController.Panning(e.GetPosition(this));
+        selection.PointerMoved(this, e);
     }
 
     protected override void OnPointerPressed(PointerPressedEventArgs e)
     {
-        // if (e.Properties.IsLeftButtonPressed)
-        // {
-        //     var myFlyout = new Flyout
-        //     {
-        //         Placement = PlacementMode.Center,
-        //         Content = new ModuleList()
-        //     };
-        //     myFlyout.ShowAt(this);
-        // }
+        if (e.Properties.IsLeftButtonPressed)
+            selection.PointerPressed(e);
         if (e.Properties.IsMiddleButtonPressed)
+            cameraController.PanStart(this, e.GetPosition(this));
+        if (e.Properties.IsRightButtonPressed)
         {
-            CameraController.PanStart(e.GetPosition(this));
-        }
-        // if (e.Properties.IsRightButtonPressed)
-        // {
-        //     var menuItem = new MenuItem();
-        //     menuItem.Header = "Test";
-        //     menuItem.Click += OpenFileMenuItem_Click!;
-        //     var flyout = new MenuFlyout()
-        //     {
-        //         Items =
-        //         {
-        //             new MenuItem() {Header = "Hello"},
-        //             new MenuItem() {Header = "Wolrd"},
-        //             menuItem
-        //         },
-        //         Placement = PlacementMode.Center,
+            var AddMenuItem = new MenuItem
+            {
+                Header = "Add",
+                Command = ReactiveCommand.Create(() =>
+                    {
+                        var position = selection.MouseCanvasPosition;
+                        Service.Instance.GetService<CommandService>()!.Do(new AddModuleCommand(boardState, typeof(Test), position));
+                    })
+            };
 
-        //     };
-        //     flyout.ShowAt(this, true);
-        // }
+            var flyout = new MenuFlyout()
+            {
+                Items =
+                {
+                    AddMenuItem
+                },
+                Placement = PlacementMode.Center,
+
+            };
+            flyout.ShowAt(this, true);
+        }
     }
     protected override void OnPointerReleased(PointerReleasedEventArgs e)
     {
+        if (e.Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonReleased)
+            selection.PointerReleased(this, e);
         if (e.Properties.PointerUpdateKind == PointerUpdateKind.MiddleButtonReleased)
-        {
-            CameraController.PanEnd();
-        }
-    }
-    private void OpenFileMenuItem_Click(object sender, Avalonia.Interactivity.RoutedEventArgs e)
-    {
-        Console.WriteLine("Test");
+            cameraController.PanEnd(this);
     }
     protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
     {
-        CameraController.ZoomCamera((float)e.Delta.Y);
+        cameraController.ZoomCamera((float)e.Delta.Y);
     }
     private void StartUpdateLoop(object sender, RoutedEventArgs e)
     {
+        this.Focus();
         TopLevel.GetTopLevel(this)?.RequestAnimationFrame(Update);
     }
 
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+
+    }
+    protected override void OnKeyUp(KeyEventArgs e)
+    {
+
+    }
 
     private void Update(TimeSpan elapsedTime)
     {
-        DeltaTime.Calculate(elapsedTime);
+        deltaTime.Calculate(elapsedTime);
+        foreach (var module in boardState.Modules)
+        {
+            module.Update();
+        }
+        selection.Hover();
+
         TopLevel.GetTopLevel(this)?.RequestAnimationFrame(Update);
         InvalidateVisual();
     }
-
     public sealed override void Render(DrawingContext context)
     {
         base.Render(context);
-        context.DrawRectangle(Brushes.Transparent, new Pen(0), new Rect(Bounds.Size), 0);
-        DebugInfo.Reset();
-        DebugInfo.Draw(context, DeltaTime.Time.ToString());
-        DebugInfo.Draw(context, DeltaTime.Fps.ToString());
+        context.DrawRectangle(new SolidColorBrush(new Color(255, 245, 245, 245)), new Pen(0), new Rect(Bounds.Size), 0);
 
-        context.DrawText(new FormattedText(
-                       "Hello, World!",
-                       CultureInfo.InvariantCulture, // Initial culture
-                       FlowDirection.LeftToRight,
-                       new Typeface("Arial"),
-                       12.0,
-                       Brushes.Black), Service.Instance.GetService<InputService>().MousePosition
-                       );
-        var PluginService = Service.Instance.GetService<PluginService>();
+        context.PushTransform(Matrix.CreateTranslation(cameraController.Position));
+        context.PushTransform(Matrix.CreateScale(cameraController.Zoom));
 
-        foreach (var plugin in PluginService.Plugins.Index())
+
+        foreach (var module in boardState.Modules)
         {
-            context.DrawText(
-                new FormattedText(
-                    plugin.Item.Name,
-                    CultureInfo.InvariantCulture, // Initial culture
-                    FlowDirection.LeftToRight,
-                    new Typeface("helvetica", FontStyle.Normal, FontWeight.ExtraLight),
-                    32,
-                    Brushes.Black
-                ),
-                new(100, plugin.Index * 25)
-            );
+            context.PushTransform(Matrix.CreateTranslation(module.View.Position));
+            module.Draw(context);
+            context.PushTransform(Matrix.CreateTranslation(-module.View.Position));
         }
-        context.PushTransform(Matrix.CreateScale(CameraController.Zoom));
-        context.PushTransform(Matrix.CreateTranslation(CameraController.Position));
+        selection.DrawBoxSelect(context);
+
         var pen = new Pen(Brushes.Red, 10);
         context.DrawLine(pen, new Point(0, 0), new Point(1000, 2000));
 
+        context.PushTransform(Matrix.CreateScale(new Vector2(1 / cameraController.Zoom.X, 1 / cameraController.Zoom.Y)));
+        context.PushTransform(Matrix.CreateTranslation(-cameraController.Position));
+
+
+        debugInfo.Reset();
+        debugInfo.Draw(context, deltaTime.Time.ToString());
+        debugInfo.Draw(context, deltaTime.Fps.ToString());
+        debugInfo.Draw(context, cameraController.Position.ToString());
+        debugInfo.Draw(context, cameraController.Zoom.ToString());
+        debugInfo.Draw(context, selection.MouseViewportPosition.ToString());
+        debugInfo.Draw(context, selection.MouseCanvasPosition.ToString());
+        debugInfo.Draw(context, selection.boxSelect.TopLeft.ToString());
+        debugInfo.Draw(context, selection.boxSelect.BottomRight.ToString());
+
+
+        debugInfo.Dump(context, boardState, selection);
 
     }
 }

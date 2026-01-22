@@ -6,13 +6,34 @@
 
   - defaultExpanded: false
   - steps:
-      - [ ] Canvas
-      - [ ] Zoom
-      - [x] Pan
+      - [X] Canvas
+      - [X] CameraController
+        - [X] Pan
+        - [X] Zoom
+      - [x] InputController
+        - [ ] Selection
+          - [X] Click
+          - [X] Box Select
+          - [X] Shift Select
+          - [X] Select All Button
+          - [X] Deselect All Button
+        - [x] Move
+          - [X] Command
+          - [] Layout
+        - [ ] Add
+        - [X] Delete
+        - [ ] Duplicate
+        - [ ] Copy/Paste
+      - [X] Command Pattern
+        - [X] Interface
+        - [X] Do
+        - [X] Undo
       - [ ] Draw Plugin
       - [ ] List Plugins
       - [ ] Context Menu
       - [ ] Handle Inputs
+      - [ ] Wires
+      - [ ] Controls
 
 ## Working
 

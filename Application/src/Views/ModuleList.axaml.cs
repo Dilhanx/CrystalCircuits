@@ -1,9 +1,11 @@
 using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
+using ReactiveUI;
 
 namespace CrystalCircuits.Application;
 
@@ -13,6 +15,16 @@ public partial class ModuleList : UserControl
     public ModuleList()
     {
         InitializeComponent();
+        Focusable = true;
+
+        KeyBindings.Add(new KeyBinding
+        {
+            Gesture = new KeyGesture(Key.S),
+            Command = ReactiveCommand.Create(() =>
+                {
+                    Console.WriteLine("TGest");
+                })
+        });
     }
     public void ButtonClickHandler(object sender, RoutedEventArgs e)
     {

@@ -1,6 +1,6 @@
-namespace CrystalCircuits.Core.Connection;
+namespace CrystalCircuits.Core.Connections;
 
-interface IConnection
+public interface IConnection
 {
     public void Update();
     public void Draw();
