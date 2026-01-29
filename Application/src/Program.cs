@@ -4,5 +4,6 @@ AppBuilder.Configure<App>()
             .WithInterFont()
             .LogToTrace()
             .UseReactiveUI()
+            .WithDeveloperTools()
             .StartWithClassicDesktopLifetime(args);
 

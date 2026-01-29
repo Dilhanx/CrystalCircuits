@@ -3,7 +3,7 @@ using CrystalCircuits.Core.Modules;
 
 namespace CrystalCircuits.Application.Commands;
 
-class DeleteModuleCommand(BoardState boardState, List<IModule> modules) : ICommand
+class RemoveModuleCommand(BoardState boardState, List<IModule> modules) : ICommand
 {
     public bool Do()
     {

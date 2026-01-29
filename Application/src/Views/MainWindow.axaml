@@ -9,8 +9,9 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <DockPanel>
-        <cc:TopBar DockPanel.Dock="Top"/>
+
+    <DockPanel x:Name="Dock">
+        <cc:TopBar DockPanel.Dock="Top" />
         <cc:ModuleBoard Name="ModuleBoard" />
     </DockPanel>
 </Window>

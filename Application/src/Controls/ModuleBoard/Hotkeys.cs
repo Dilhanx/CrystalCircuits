@@ -54,7 +54,7 @@ static class Hotkeys
                 {
                     if (!selection.Locked)
                     {
-                        Service.Instance.GetService<CommandService>()!.Do(new DeleteModuleCommand(boardState, selection.Selected));
+                        Service.Instance.GetService<CommandService>()!.Do(new RemoveModuleCommand(boardState, selection.Selected));
                         selection.DeselectAll();
                     }
                 })

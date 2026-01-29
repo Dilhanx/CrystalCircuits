@@ -29,7 +29,7 @@ public class Test : IModule
         }
         if (State.Hover)
         {
-            context.DrawRectangle(Brushes.Yellow, new Pen(0), new Rect(View.Size / 2), 0);
+            // context.DrawRectangle(Brushes.Yellow, new Pen(0), new Rect(View.Size / 2), 0);
         }
         context.DrawText(
             new FormattedText(

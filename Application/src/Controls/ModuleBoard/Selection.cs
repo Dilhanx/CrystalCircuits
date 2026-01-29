@@ -1,3 +1,4 @@
+using System.Reflection;
 using Avalonia.Input;
 using Avalonia.Media;
 using CrystalCircuits.Core.Modules;
@@ -190,17 +191,24 @@ class Selection(CameraController cameraController, BoardState boardState, DeltaT
                 {
                     if (frozenModule.Key.View.Rect.Intersects(module.View.Rect))
                     {
-                        
+
                     }
                 }
             }
         }
     }
+    public void DrawSelectedOutline(DrawingContext context)
+    {
+        if (Selected.Count >= 2)
+            Selected.ForEach(module => context.DrawRectangle(Service.Instance.GetService<SettingService>()!.Theme.SelectedModules.Background,
+                    Service.Instance.GetService<SettingService>()!.Theme.SelectedModules.Border,
+                    module.View.Rect, 0));
+    }
     public void DrawBoxSelect(DrawingContext context)
     {
         if (boxSelecting)
-            context.DrawRectangle(new SolidColorBrush(new Color(25, 255, 255, 255)),
-                                new Pen(new SolidColorBrush(new Color(255, 255, 255, 255)), 1),
+            context.DrawRectangle(Service.Instance.GetService<SettingService>()!.Theme.BoxSelect.Background,
+                                Service.Instance.GetService<SettingService>()!.Theme.BoxSelect.Border,
                                 boxSelect.Normalize(), 0);
     }
 

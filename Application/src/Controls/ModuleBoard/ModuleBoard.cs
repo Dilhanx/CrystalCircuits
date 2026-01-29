@@ -1,9 +1,12 @@
 using System.Globalization;
 using System.Numerics;
 using Avalonia.Controls;
+using Avalonia.Controls.Presenters;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.Styling;
 using CrystalCircuits.Application.Controls.ModuleBoards;
 using ReactiveUI;
 
@@ -58,16 +61,25 @@ public class ModuleBoard : UserControl
                         Service.Instance.GetService<CommandService>()!.Do(new AddModuleCommand(boardState, typeof(Test), position));
                     })
             };
+            var RemoveMenuItem = new MenuItem
+            {
+                Header = "Remove",
+                Command = ReactiveCommand.Create(() =>
+                    {
+                        var position = selection.MouseCanvasPosition;
+                        Service.Instance.GetService<CommandService>()!.Do(new RemoveModuleCommand(boardState,  selection.Selected));
+                        selection.DeselectAll();
+                    })
+            };
+            Menu Items = new();
 
             var flyout = new MenuFlyout()
             {
-                Items =
-                {
-                    AddMenuItem
-                },
                 Placement = PlacementMode.Center,
-
+                ShowMode = FlyoutShowMode.Transient
             };
+            flyout.Items.Add(AddMenuItem);
+            flyout.Items.Add(RemoveMenuItem);
             flyout.ShowAt(this, true);
         }
     }
@@ -118,6 +130,7 @@ public class ModuleBoard : UserControl
         context.PushTransform(Matrix.CreateTranslation(cameraController.Position));
         context.PushTransform(Matrix.CreateScale(cameraController.Zoom));
 
+        selection.DrawSelectedOutline(context);
         foreach (var module in boardState.Modules)
         {
             context.PushTransform(Matrix.CreateTranslation(module.View.Position));

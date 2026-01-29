@@ -12,6 +12,7 @@ static class Service
         collection.AddSingleton<PluginService>();
         collection.AddSingleton<CommandService>();
         collection.AddSingleton<ProjectService>();
+        collection.AddSingleton<SettingService>();
         Instance = collection.BuildServiceProvider();
     }
 }

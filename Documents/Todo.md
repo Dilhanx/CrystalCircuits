@@ -34,6 +34,7 @@
       - [ ] Handle Inputs
       - [ ] Wires
       - [ ] Controls
+      - [ ] Theme
 
 ## Working
 

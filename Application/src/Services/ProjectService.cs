@@ -9,7 +9,12 @@ class ProjectService
 {
     public IStorageFile? File { get; set; }
     public BoardState boardState { get; init; } = new();
-    public void New() => boardState.New();
+    public void New()
+    {
+        File = null;
+        boardState.New();
+    }
+
     public async Task SaveAsync(TopLevel topLevel)
     {
         if (File is null)
