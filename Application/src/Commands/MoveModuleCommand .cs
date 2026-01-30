@@ -9,27 +9,17 @@ class MoveModuleCommand : ICommand
     private readonly Dictionary<IModule, Point> moduleEndPosition = [];
     public MoveModuleCommand(Dictionary<IModule, Point> moduleStartPosition)
     {
-        foreach (var module in moduleStartPosition)
-        {
-            moduleEndPosition.Add(module.Key, module.Key.View.Position);
-        }
-
+        moduleStartPosition.ToList().ForEach(module => moduleEndPosition.Add(module.Key, module.Key.View.Position));
         this.moduleStartPosition = moduleStartPosition;
     }
     public bool Do()
     {
-        foreach (var module in moduleEndPosition)
-        {
-            module.Key.View.Position = module.Value;
-        }
+        moduleEndPosition.ToList().ForEach(module => module.Key.View.Position = module.Value);
         return true;
     }
     public bool Undo()
     {
-        foreach (var module in moduleStartPosition)
-        {
-            module.Key.View.Position = module.Value;
-        }
+        moduleStartPosition.ToList().ForEach(module => module.Key.View.Position = module.Value);
         return true;
     }
 }

@@ -6,9 +6,11 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
 using Avalonia.Styling;
 using CrystalCircuits.Application.Controls.ModuleBoards;
 using ReactiveUI;
+using SkiaSharp;
 
 namespace CrystalCircuits.Application.Controls;
 
@@ -58,7 +60,7 @@ public class ModuleBoard : UserControl
                 Command = ReactiveCommand.Create(() =>
                     {
                         var position = selection.MouseCanvasPosition;
-                        Service.Instance.GetService<CommandService>()!.Do(new AddModuleCommand(boardState, typeof(Test), position,selection));
+                        Service.Instance.GetService<CommandService>()!.Do(new AddModuleCommand(boardState, typeof(Test), position, selection));
                     })
             };
             var RemoveMenuItem = new MenuItem
@@ -67,8 +69,7 @@ public class ModuleBoard : UserControl
                 Command = ReactiveCommand.Create(() =>
                     {
                         var position = selection.MouseCanvasPosition;
-                        Service.Instance.GetService<CommandService>()!.Do(new RemoveModuleCommand(boardState,  selection.Selected));
-                        selection.DeselectAll();
+                        Service.Instance.GetService<CommandService>()!.Do(new RemoveModuleCommand(boardState, selection.Selected,selection));
                     })
             };
             Menu Items = new();
@@ -131,11 +132,14 @@ public class ModuleBoard : UserControl
         context.PushTransform(Matrix.CreateScale(cameraController.Zoom));
 
         selection.DrawSelectedOutline(context);
+
         foreach (var module in boardState.Modules)
         {
             context.PushTransform(Matrix.CreateTranslation(module.View.Position));
             if (module.View.Rect.Intersects(cameraController.Rect))
+            {
                 module.Draw(context);
+            }
             context.PushTransform(Matrix.CreateTranslation(-module.View.Position));
         }
         selection.DrawBoxSelect(context);

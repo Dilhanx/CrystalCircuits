@@ -54,8 +54,7 @@ static class Hotkeys
                 {
                     if (!selection.Locked)
                     {
-                        Service.Instance.GetService<CommandService>()!.Do(new RemoveModuleCommand(boardState, selection.Selected));
-                        selection.DeselectAll();
+                        Service.Instance.GetService<CommandService>()!.Do(new RemoveModuleCommand(boardState, selection.Selected, selection));
                     }
                 })
         });
@@ -101,6 +100,40 @@ static class Hotkeys
                     if (!selection.Locked)
                     {
                         await Service.Instance.GetService<ProjectService>()!.SaveAsAsync(TopLevel.GetTopLevel(moduleBoard)!);
+                    }
+                })
+        });
+
+        keyBindings.Add(new KeyBinding
+        {
+            Gesture = new KeyGesture(Key.C, KeyModifiers.Control),
+            Command = ReactiveCommand.Create(async () =>
+                {
+                    if (!selection.Locked)
+                    {
+                        Service.Instance.GetService<CommandService>()!.Do(new CopyModuleCommand(selection));
+                    }
+                })
+        });
+        keyBindings.Add(new KeyBinding
+        {
+            Gesture = new KeyGesture(Key.X, KeyModifiers.Control),
+            Command = ReactiveCommand.Create(async () =>
+                {
+                    if (!selection.Locked)
+                    {
+                        Service.Instance.GetService<CommandService>()!.Do(new CutModuleCommand(boardState, selection));
+                    }
+                })
+        });
+        keyBindings.Add(new KeyBinding
+        {
+            Gesture = new KeyGesture(Key.V, KeyModifiers.Control),
+            Command = ReactiveCommand.Create(async () =>
+                {
+                    if (!selection.Locked)
+                    {
+                        Service.Instance.GetService<CommandService>()!.Do(new PasteModuleCommand(boardState, selection));
                     }
                 })
         });

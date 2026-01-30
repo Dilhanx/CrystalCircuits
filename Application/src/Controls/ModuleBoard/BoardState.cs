@@ -31,11 +31,7 @@ partial class BoardState
         byte[] bytes = File.ReadAllBytes(file.Path.AbsolutePath);
         BoardState tempState = (BoardState)MessagePackSerializer.Typeless.Deserialize(bytes)!;
         Modules = tempState.Modules;
-        Modules.ForEach(Module =>
-        {
-            Module.State.Hover = false;
-            Module.State.Selected = false;
-        });
+        Modules.ForEach(Module => Module.State.Clear());
         Connections = tempState.Connections;
     }
 }

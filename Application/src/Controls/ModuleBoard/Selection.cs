@@ -3,6 +3,7 @@ using Avalonia.Input;
 using Avalonia.Media;
 using CrystalCircuits.Core.Modules;
 using DynamicData;
+using MessagePack;
 
 namespace CrystalCircuits.Application.Controls.ModuleBoards;
 
@@ -227,7 +228,7 @@ class Selection(CameraController cameraController, BoardState boardState, DeltaT
                     {
                         var distX = overlappingModule.View.Position.X - frozenModule.View.Position.X;
                         var distY = overlappingModule.View.Position.Y - frozenModule.View.Position.Y;
-                        if (Math.Abs(distX) > Math.Abs(distY) && (Math.Sign(distX) > 0 || LastMove == Direction.Right))
+                        if (Math.Abs(distX) > Math.Abs(distY) && (Math.Sign(distX) >= 0 || LastMove == Direction.Right))
                         {
                             overlappingModule.View.Position = new(frozenModule.View.Rect.Center.X + (frozenModule.View.Size.Width / 2),
                                             overlappingModule.View.Position.Y);
@@ -241,7 +242,7 @@ class Selection(CameraController cameraController, BoardState boardState, DeltaT
                             LastMove = Direction.Left;
                             index = -1;
                         }
-                        else if (Math.Abs(distX) <= Math.Abs(distY) && (Math.Sign(distY) > 0 || LastMove == Direction.Down))
+                        else if (Math.Abs(distX) <= Math.Abs(distY) && (Math.Sign(distY) >= 0 || LastMove == Direction.Down))
                         {
                             overlappingModule.View.Position = new(overlappingModule.View.Position.X,
                             frozenModule.View.Rect.Center.Y + (frozenModule.View.Size.Height / 2));
@@ -272,13 +273,29 @@ class Selection(CameraController cameraController, BoardState boardState, DeltaT
     }
 
 
+    public List<IModule> clipBoard = [];
+
+    public List<IModule> Clone(List<IModule> modules)
+    {
+        var Serializer = MessagePackSerializer.Typeless.Serialize(modules);
+        clipBoard = (List<IModule>)MessagePackSerializer.Typeless.Deserialize(Serializer)!;
+        clipBoard.ForEach(module => module.State.Clear());
+
+
+        return clipBoard;
+    }
+
 
     public void DrawSelectedOutline(DrawingContext context)
     {
         if (Selected.Count >= 2)
-            Selected.ForEach(module => context.DrawRectangle(Service.Instance.GetService<SettingService>()!.Theme.SelectedModules.Background,
-                    Service.Instance.GetService<SettingService>()!.Theme.SelectedModules.Border,
-                    module.View.Rect, 0));
+            Selected.ForEach(module =>
+            {
+                if (module.State.Selected)
+                    context.DrawRectangle(Service.Instance.GetService<SettingService>()!.Theme.SelectedModules.Background,
+                        Service.Instance.GetService<SettingService>()!.Theme.SelectedModules.Border,
+                        module.View.Rect, 0);
+            });
     }
     public void DrawBoxSelect(DrawingContext context)
     {

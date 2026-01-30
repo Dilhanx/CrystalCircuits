@@ -2,4 +2,5 @@
   <Project Path="Application/Application.csproj" />
   <Project Path="Core/Core.csproj" />
   <Project Path="Modules/Modules.csproj" />
+  
 </Solution>

@@ -65,7 +65,7 @@ class DebugInfo()
                 new(200, plugin.Index * 25)
             );
         }
-        foreach (var plugin in Service.Instance.GetService<CommandService>()!.Commands.Index())
+        foreach (var plugin in Service.Instance.GetService<CommandService>()!.Commands.Item1.Index())
         {
             context.DrawText(
                 new FormattedText(
@@ -77,6 +77,20 @@ class DebugInfo()
                     Brushes.Black
                 ),
                 new(300, plugin.Index * 25)
+            );
+        }
+        foreach (var plugin in Service.Instance.GetService<CommandService>()!.Commands.Item2.Index())
+        {
+            context.DrawText(
+                new FormattedText(
+                    plugin.Item.GetType().ToString(),
+                    CultureInfo.InvariantCulture, // Initial culture
+                    FlowDirection.LeftToRight,
+                    new Typeface("helvetica", FontStyle.Normal, FontWeight.ExtraLight),
+                    12,
+                    Brushes.Black
+                ),
+                new(300, 500 + plugin.Index * 25)
             );
         }
         foreach (var plugin in selection.Selected.Index())
@@ -93,18 +107,5 @@ class DebugInfo()
                 new(800, plugin.Index * 25)
             );
         }
-
-        // Task.Run(() =>
-        // {
-        //     using (Process currentProcess = Process.GetCurrentProcess())
-        //     {
-        //         currentProcess.Refresh();
-        //         long privateMemoryBytes = currentProcess.PrivateMemorySize64;
-        //         double privateMemoryMB = Math.Round(privateMemoryBytes / (1024.0 * 1024.0), 2);
-        //         long workingSetBytes = currentProcess.WorkingSet64;
-        //         double workingSetMB = Math.Round(workingSetBytes / (1024.0 * 1024.0), 2);
-        //         Draw(context, $"{privateMemoryMB} / {workingSetMB}");
-        //     }
-        // });
     }
 }

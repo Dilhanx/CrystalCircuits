@@ -19,11 +19,10 @@
           - [X] Deselect All Button
         - [x] Move
           - [X] Command
-          - [] Layout
+          - [X] Layout
         - [ ] Add
         - [X] Delete
-        - [ ] Duplicate
-        - [ ] Copy/Paste
+        - [ ] Copy/Cut/Paste
       - [X] Command Pattern
         - [X] Interface
         - [X] Do
@@ -34,7 +33,7 @@
       - [ ] Handle Inputs
       - [ ] Wires
       - [ ] Controls
-      - [ ] Theme
+      - [X] Theme
 
 ## Working
 

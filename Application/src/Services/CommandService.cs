@@ -6,7 +6,7 @@ class CommandService
 {
     private Stack<ICommand> doCommands = [];
     private Stack<ICommand> undoCommands = [];
-    public Stack<ICommand> Commands { get => new Stack<ICommand>(doCommands.Concat(undoCommands)); }
+    public (Stack<ICommand>, Stack<ICommand>) Commands { get => (doCommands, undoCommands); }
     public void Do(ICommand command, params object[] parameter)
     {
         if (command.Do())
