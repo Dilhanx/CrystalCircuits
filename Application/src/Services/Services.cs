@@ -1,5 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-
 namespace CrystalCircuits.Application.Services;
 
 static class Service

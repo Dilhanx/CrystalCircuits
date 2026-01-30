@@ -58,7 +58,7 @@ public class ModuleBoard : UserControl
                 Command = ReactiveCommand.Create(() =>
                     {
                         var position = selection.MouseCanvasPosition;
-                        Service.Instance.GetService<CommandService>()!.Do(new AddModuleCommand(boardState, typeof(Test), position));
+                        Service.Instance.GetService<CommandService>()!.Do(new AddModuleCommand(boardState, typeof(Test), position,selection));
                     })
             };
             var RemoveMenuItem = new MenuItem

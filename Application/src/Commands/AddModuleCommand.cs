@@ -3,7 +3,7 @@ using CrystalCircuits.Core.Modules;
 
 namespace CrystalCircuits.Application.Commands;
 
-class AddModuleCommand(BoardState boardState, Type type, Point position = new()) : ICommand
+class AddModuleCommand(BoardState boardState, Type type, Point position, Selection selection) : ICommand
 {
     IModule? module;
     public bool Do()
@@ -11,6 +11,7 @@ class AddModuleCommand(BoardState boardState, Type type, Point position = new())
         module ??= Activator.CreateInstance(type) as IModule;
         module!.View.Position = position;
         boardState.Modules.Add(module);
+        selection.Untangle([module]);
         return true;
     }
     public bool Undo()

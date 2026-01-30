@@ -7,7 +7,7 @@ namespace CrystalCircuits.Modules;
 
 public class Test : IModule
 {
-    public int id = Random.Shared.Next();
+    public int Id { get; init; } = Random.Shared.Next();
     public string Name { get; init; } = "Test Module";
     public string Description { get; init; } = "A module to test board capabilities";
     public List<string> Tags { get; init; } = ["Test", "Utility"];
@@ -15,6 +15,7 @@ public class Test : IModule
     public View View { get; init; } = new()
     {
         Size = new(Random.Shared.Next(225) + 25, Random.Shared.Next(225) + 25),
+        // Size = new(150, 150),
         Position = new(0, 0)
     };
     public void Draw(DrawingContext context)
@@ -33,7 +34,7 @@ public class Test : IModule
         }
         context.DrawText(
             new FormattedText(
-            id.ToString(),
+            Id.ToString(),
             CultureInfo.InvariantCulture, // Initial culture
             FlowDirection.LeftToRight,
             new Typeface("helvetica", FontStyle.Normal, FontWeight.ExtraLight),

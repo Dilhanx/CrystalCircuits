@@ -2,6 +2,7 @@ using System.Reflection;
 using Avalonia.Input;
 using Avalonia.Media;
 using CrystalCircuits.Core.Modules;
+using DynamicData;
 
 namespace CrystalCircuits.Application.Controls.ModuleBoards;
 
@@ -93,6 +94,7 @@ class Selection(CameraController cameraController, BoardState boardState, DeltaT
             {
                 moving = true;
                 moveStartPosition = MouseCanvasPosition;
+                moduleStartPosition = new();
                 boardState.Modules.ForEach(module => moduleStartPosition.Add(module, module.View.Position));
             }
         }
@@ -119,9 +121,8 @@ class Selection(CameraController cameraController, BoardState boardState, DeltaT
         }
         if (moving)
         {
-            Layout();
+            LayoutMove();
             moved = true;
-
             moduleBoard.Cursor = new Cursor(StandardCursorType.SizeAll);
         }
     }
@@ -169,34 +170,109 @@ class Selection(CameraController cameraController, BoardState boardState, DeltaT
         moduleStartPosition = new();
         moduleBoard.Cursor = new Cursor(StandardCursorType.Arrow);
     }
-    private void Layout()
+    private enum Direction
     {
-        Dictionary<IModule, bool> frozenModules = [];
-        foreach (var module in moduleStartPosition)
-        {
-            frozenModules.Add(module.Key, false);
-        }
+        None,
+        Up,
+        Down,
+        Left,
+        Right
+    }
+    private void LayoutMove()
+    {
+        List<IModule> frozenModules = [];
 
         var moveDelta = MouseCanvasPosition - moveStartPosition;
         Selected.ForEach(module => module.View.Position = moduleStartPosition[module] + moveDelta);
-        Selected.ForEach(module => frozenModules[module] = true);
+        Selected.ForEach(frozenModules.Add);
 
-        bool completed = false;
-        while (!completed)
+        List<IModule> unFrozenModules = [.. boardState.Modules.Except(frozenModules)];
+        unFrozenModules.ForEach(module => module.View.Position = moduleStartPosition[module]);
+
+        Layout(frozenModules, unFrozenModules);
+    }
+    public void Untangle(List<IModule> modules)
+    {
+        List<IModule> frozenModules = [.. modules];
+        List<IModule> unFrozenModules = [.. boardState.Modules.Except(frozenModules)];
+        Layout(frozenModules, unFrozenModules);
+    }
+    private void Layout(List<IModule> frozenModules, List<IModule> unFrozenModules)
+    {
+        HashSet<IModule> overlappingModules = [];
+        Direction LastMove = Direction.None;
+        bool completed;
+        int breakCount = 0;
+        do
         {
             completed = true;
-            foreach (var frozenModule in frozenModules)
+            overlappingModules = [];
+            frozenModules.ForEach(frozenModule => unFrozenModules.ForEach(unFrozenModule =>
             {
-                foreach (var module in boardState.Modules)
+                if (frozenModule.View.Rect.Intersects(unFrozenModule.View.Rect))
                 {
-                    if (frozenModule.Key.View.Rect.Intersects(module.View.Rect))
+                    overlappingModules.Add(unFrozenModule);
+                    completed = false;
+                }
+            }));
+            var index = 0;
+            foreach (var overlappingModule in overlappingModules)
+            {
+                index = 0;
+                LastMove = Direction.None;
+                while (index < frozenModules.Count)
+                {
+                    var frozenModule = frozenModules.ElementAt(index);
+                    if (overlappingModule.View.Rect.Intersects(frozenModule.View.Rect))
                     {
-
+                        var distX = overlappingModule.View.Position.X - frozenModule.View.Position.X;
+                        var distY = overlappingModule.View.Position.Y - frozenModule.View.Position.Y;
+                        if (Math.Abs(distX) > Math.Abs(distY) && (Math.Sign(distX) > 0 || LastMove == Direction.Right))
+                        {
+                            overlappingModule.View.Position = new(frozenModule.View.Rect.Center.X + (frozenModule.View.Size.Width / 2),
+                                            overlappingModule.View.Position.Y);
+                            LastMove = Direction.Right;
+                            index = -1;
+                        }
+                        else if (Math.Abs(distX) > Math.Abs(distY) && (Math.Sign(distX) < 0 || LastMove == Direction.Left))
+                        {
+                            overlappingModule.View.Position = new(frozenModule.View.Position.X - overlappingModule.View.Size.Width,
+                            overlappingModule.View.Position.Y);
+                            LastMove = Direction.Left;
+                            index = -1;
+                        }
+                        else if (Math.Abs(distX) <= Math.Abs(distY) && (Math.Sign(distY) > 0 || LastMove == Direction.Down))
+                        {
+                            overlappingModule.View.Position = new(overlappingModule.View.Position.X,
+                            frozenModule.View.Rect.Center.Y + (frozenModule.View.Size.Height / 2));
+                            LastMove = Direction.Down;
+                            index = -1;
+                        }
+                        else if (Math.Abs(distX) <= Math.Abs(distY) && (Math.Sign(distY) < 0 || LastMove == Direction.Up))
+                        {
+                            overlappingModule.View.Position = new(overlappingModule.View.Position.X,
+                            frozenModule.View.Position.Y - overlappingModule.View.Size.Height);
+                            LastMove = Direction.Up;
+                            index = -1;
+                        }
+                    }
+                    index++;
+                    breakCount++;
+                    if (breakCount > (boardState.Modules.Count * boardState.Modules.Count * 10))
+                    {
+                        goto Infinite;
                     }
                 }
+                frozenModules.Add(overlappingModule);
+                unFrozenModules.Remove(overlappingModule);
             }
-        }
+        } while (!completed);
+    Infinite:
+        return;
     }
+
+
+
     public void DrawSelectedOutline(DrawingContext context)
     {
         if (Selected.Count >= 2)
